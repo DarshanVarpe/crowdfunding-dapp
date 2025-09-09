@@ -1,5 +1,7 @@
 // client/src/components/TierCard.tsx
+
 'use client';
+
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { CROWDFUNDING_ABI } from "@/constants";

@@ -14,9 +14,11 @@ export default function TermsPage() {
                 <p className="text-base font-semibold leading-7 text-blue-600">Last updated on September 9, 2025</p>
                 <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Terms of Service</h1>
                 <div className="mt-10 max-w-2xl">
-                    <p>Welcome to CrowdFund. By using our decentralized application ("dApp"), you agree to these terms. This dApp operates on the Polygon blockchain, and all transactions are final, irreversible, and managed by smart contracts.</p>
+                    {/* FIX: Replaced quotes with &quot; */}
+                    <p>Welcome to CrowdFund. By using our decentralized application (&quot;dApp&quot;), you agree to these terms. This dApp operates on the Polygon blockchain, and all transactions are final, irreversible, and managed by smart contracts.</p>
                     <h2 className="mt-8 text-2xl font-bold tracking-tight text-gray-900">1. Nature of the Platform</h2>
-                    <p className="mt-4">Our platform is a decentralized venue that allows creators to launch crowdfunding campaigns and backers to support them. We are not a party to any agreement between creators and backers. All funds are held in the campaign's smart contract, not by us.</p>
+                    {/* FIX: Replaced apostrophe with &apos; */}
+                    <p className="mt-4">Our platform is a decentralized venue that allows creators to launch crowdfunding campaigns and backers to support them. We are not a party to any agreement between creators and backers. All funds are held in the campaign&apos;s smart contract, not by us.</p>
                     <h2 className="mt-8 text-2xl font-bold tracking-tight text-gray-900">2. User Responsibilities</h2>
                     <p className="mt-4">You are solely responsible for the security of your wallet and private keys. We do not have access to your funds and cannot reverse transactions. You agree not to use this platform for any illegal activities.</p>
                     <ul role="list" className="mt-6 max-w-xl space-y-4 text-gray-600">
