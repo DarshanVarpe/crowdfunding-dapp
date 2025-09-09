@@ -7,7 +7,7 @@ import { ethers } from 'ethers';
 import { FACTORY_ADDRESS, FACTORY_ABI } from '@/constants';
 import { CampaignCard } from '@/components/CampaignCard';
 
-// Define a type for our campaign data to make our code type-safe
+// This type was already here, which is great!
 type Campaign = {
   campaignAddress: string;
   owner: string;
@@ -37,7 +37,9 @@ export default function Home() {
 
         const campaignData = await factoryContract.getAllCampaigns();
         
-        const formattedCampaigns: Campaign[] = campaignData.map((campaign: any) => ({
+        // --- THIS IS THE FIX ---
+        // We explicitly tell TypeScript that 'campaign' is of type 'Campaign'
+        const formattedCampaigns: Campaign[] = campaignData.map((campaign: Campaign) => ({
           campaignAddress: campaign.campaignAddress,
           owner: campaign.owner,
           name: campaign.name,

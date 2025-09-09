@@ -8,6 +8,7 @@ import { MyCampaignCard } from "@/components/MyCampaignCard";
 import { FACTORY_ADDRESS, FACTORY_ABI } from "@/constants";
 import { useParams } from "next/navigation";
 
+// --- 1. DEFINE THE CAMPAIGN TYPE HERE ---
 type Campaign = {
     campaignAddress: string;
     owner: string;
@@ -32,7 +33,8 @@ export default function DashboardPage() {
             const contract = new ethers.Contract(FACTORY_ADDRESS, FACTORY_ABI, provider);
             const campaignData = await contract.getUserCampaigns(walletAddress as string);
             
-            const formattedCampaigns: Campaign[] = campaignData.map((campaign: any) => ({
+            // --- 2. APPLY THE TYPE TO THE PARAMETER ---
+            const formattedCampaigns: Campaign[] = campaignData.map((campaign: Campaign) => ({
                 campaignAddress: campaign.campaignAddress,
                 owner: campaign.owner,
                 name: campaign.name,
@@ -131,9 +133,9 @@ const CreateCampaignModal = ({ setIsModalOpen, refetchCampaigns }: CreateCampaig
             alert("Campaign created successfully!");
             setIsModalOpen(false);
             refetchCampaigns();
-        } catch (error: any) {
+        } catch (error) {
             console.error("Failed to create campaign:", error);
-            alert(`Error: ${error.message}`);
+            alert(`Error: ${(error as Error).message}`);
         } finally {
             setIsCreating(false);
         }

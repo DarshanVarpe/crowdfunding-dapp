@@ -1,4 +1,6 @@
-"use client"; 
+// client/src/app/campaign/[campaignAddress]/page.tsx
+
+'use client';
 
 import { useParams } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
@@ -86,7 +88,7 @@ export default function CampaignPage() {
         }
     };
 
-    // Corrected async/await functions for all contract write calls
+    // Functions for all contract write calls
     const handleWithdraw = () => {
         const action = async () => {
             const browserProvider = new ethers.BrowserProvider(window.ethereum);
@@ -130,7 +132,6 @@ export default function CampaignPage() {
     if (isLoading) return <div className="text-center mt-20"><p>Loading Campaign Details...</p></div>;
     if (!details) return <div className="text-center mt-20"><p>Campaign Not Found.</p></div>;
 
-    // UI logic variables
     const goalNum = Number(ethers.formatEther(details.goal));
     const balanceNum = Number(ethers.formatEther(details.balance));
     let balancePercentage = goalNum > 0 ? (balanceNum / goalNum) * 100 : 0;
@@ -189,7 +190,7 @@ export default function CampaignPage() {
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Pause Campaign</label>
-                                    <p className="text-xs text-gray-500 mb-2">Temporarily stop new contributions.</p>
+                                    <p className="text-xs text-gray-500 mb-2">Temporarily stop new contributions and comments.</p>
                                     <button onClick={handleTogglePause} disabled={isProcessing} className={`px-4 py-2 text-sm font-semibold text-white rounded-md shadow-sm transition-colors disabled:bg-gray-400 ${details.paused ? 'bg-green-600 hover:bg-green-700' : 'bg-amber-600 hover:bg-amber-700'}`}>
                                         {isProcessing ? 'Processing...' : (details.paused ? 'Unpause Campaign' : 'Pause Campaign')}
                                     </button>
@@ -209,7 +210,7 @@ export default function CampaignPage() {
                     )}
                     
                     <div className="bg-white p-6 rounded-lg shadow-md mt-6">
-                        <CommentsSection contractAddress={campaignAddress as string} comments={details.comments} onCommentPosted={fetchCampaignDetails} />
+                        <CommentsSection contractAddress={campaignAddress as string} comments={details.comments} onCommentPosted={fetchCampaignDetails} isPaused={details.paused} />
                     </div>
                 </div>
 
@@ -244,23 +245,13 @@ export default function CampaignPage() {
     );
 }
 
-// AddTierModal Component
-type AddTierModalProps = {
-    setIsModalOpen: (value: boolean) => void;
-    contractAddress: string;
-    onTierAdded: () => void;
-}
-
-const AddTierModal = ({ setIsModalOpen, contractAddress, onTierAdded }: AddTierModalProps) => {
+const AddTierModal = ({ setIsModalOpen, contractAddress, onTierAdded }: { setIsModalOpen: (value: boolean) => void; contractAddress: string; onTierAdded: () => void; }) => {
     const [tierName, setTierName] = useState<string>("");
     const [tierAmount, setTierAmount] = useState<string>("0.1");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleAddTier = async () => {
-        if (!tierName || !tierAmount) {
-            alert("Please fill out all fields.");
-            return;
-        }
+        if (!tierName || !tierAmount) { alert("Please fill out all fields."); return; }
         setIsSubmitting(true);
         try {
             const browserProvider = new ethers.BrowserProvider(window.ethereum);
@@ -272,9 +263,9 @@ const AddTierModal = ({ setIsModalOpen, contractAddress, onTierAdded }: AddTierM
             alert("Tier added successfully!");
             onTierAdded();
             setIsModalOpen(false);
-        } catch (error: any) {
+        } catch (error) {
             console.error(error);
-            alert(`Error adding tier: ${error.message}`);
+            alert(`Error adding tier: ${(error as Error).message}`);
         } finally {
             setIsSubmitting(false);
         }
@@ -283,38 +274,18 @@ const AddTierModal = ({ setIsModalOpen, contractAddress, onTierAdded }: AddTierM
     return (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center backdrop-blur-sm">
             <div className="w-full max-w-lg bg-white p-6 rounded-lg shadow-xl">
-                <div className="flex justify-between items-center mb-4">
-                    <p className="text-xl font-semibold text-gray-800">Add a New Tier</p>
-                    <button className="text-gray-500 hover:text-gray-800" onClick={() => setIsModalOpen(false)}>
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
+                <div className="flex justify-between items-center mb-4"><p className="text-xl font-semibold text-gray-800">Add a New Tier</p><button className="text-gray-500 hover:text-gray-800" onClick={() => setIsModalOpen(false)}><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div>
                 <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Tier Name:</label>
-                        <input type="text" value={tierName} onChange={(e) => setTierName(e.target.value)} className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Cost (POL):</label>
-                        <input type="number" value={tierAmount} onChange={(e) => setTierAmount(e.target.value)} className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
-                    </div>
-                    <button className="w-full mt-4 px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors" onClick={handleAddTier} disabled={isSubmitting}>
-                        {isSubmitting ? "Adding Tier..." : "Add Tier"}
-                    </button>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-1">Tier Name:</label><input type="text" value={tierName} onChange={(e) => setTierName(e.target.value)} className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/></div>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-1">Cost (POL):</label><input type="number" value={tierAmount} onChange={(e) => setTierAmount(e.target.value)} className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/></div>
+                    <button className="w-full mt-4 px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors" onClick={handleAddTier} disabled={isSubmitting}>{isSubmitting ? "Adding Tier..." : "Add Tier"}</button>
                 </div>
             </div>
         </div>
     );
 };
 
-// --- Comments Section Component ---
-type CommentsSectionProps = {
-    contractAddress: string;
-    comments: Comment[];
-    onCommentPosted: () => void;
-};
-
-const CommentsSection = ({ contractAddress, comments, onCommentPosted }: CommentsSectionProps) => {
+const CommentsSection = ({ contractAddress, comments, onCommentPosted, isPaused }: { contractAddress: string; comments: Comment[]; onCommentPosted: () => void; isPaused: boolean; }) => {
     const [newComment, setNewComment] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -329,9 +300,9 @@ const CommentsSection = ({ contractAddress, comments, onCommentPosted }: Comment
             await tx.wait();
             setNewComment("");
             onCommentPosted();
-        } catch (error: any) {
+        } catch (error) {
             console.error("Failed to post comment:", error);
-            alert(`Error: ${error.message}`);
+            alert(`Error: ${(error as Error).message}`);
         } finally {
             setIsSubmitting(false);
         }
@@ -343,32 +314,13 @@ const CommentsSection = ({ contractAddress, comments, onCommentPosted }: Comment
             <div className="space-y-4 mb-6 max-h-96 overflow-y-auto pr-2">
                 {comments.length > 0 ? (
                     [...comments].reverse().map((comment, index) => (
-                        <div key={index} className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                            <p className="text-sm text-gray-800 break-words">{comment.commentText}</p>
-                            <p className="text-xs text-gray-500 mt-2">
-                                By: <span className="font-medium truncate">{comment.author}</span> on {new Date(Number(comment.timestamp) * 1000).toLocaleDateString()}
-                            </p>
-                        </div>
+                        <div key={index} className="bg-gray-50 p-3 rounded-lg border border-gray-200"><p className="text-sm text-gray-800 break-words">{comment.commentText}</p><p className="text-xs text-gray-500 mt-2">By: <span className="font-medium truncate">{comment.author}</span> on {new Date(Number(comment.timestamp) * 1000).toLocaleDateString()}</p></div>
                     ))
-                ) : (
-                    <p className="text-sm text-gray-500">No comments yet. Be the first to post!</p>
-                )}
+                ) : ( <p className="text-sm text-gray-500">No comments yet. Be the first to post!</p> )}
             </div>
             <div className="space-y-2">
-                <textarea 
-                    rows={3}
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Write a comment..."
-                    className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                />
-                <button 
-                    onClick={handlePostComment}
-                    disabled={isSubmitting}
-                    className="px-5 py-2 text-sm font-semibold text-white bg-slate-700 rounded-md shadow-sm hover:bg-slate-800 disabled:bg-gray-400"
-                >
-                    {isSubmitting ? "Posting..." : "Post Comment"}
-                </button>
+                <textarea rows={3} value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder={isPaused ? "Commenting is paused by the owner." : "Write a comment..."} className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100" disabled={isPaused || isSubmitting}/>
+                <button onClick={handlePostComment} disabled={isPaused || isSubmitting} className="px-5 py-2 text-sm font-semibold text-white bg-slate-700 rounded-md shadow-sm hover:bg-slate-800 disabled:bg-gray-400 disabled:cursor-not-allowed">{isSubmitting ? "Posting..." : "Post Comment"}</button>
             </div>
         </div>
     );

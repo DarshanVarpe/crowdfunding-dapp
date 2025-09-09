@@ -1,14 +1,51 @@
 // client/src/constants/index.ts
 
-// 1. The address of your newly deployed CrowdfundingFactory contract
-export const FACTORY_ADDRESS = "0x5E6981A00C9c385d6f231d0DEa281D1883527Bd8";
+// 1. Your new, final CrowdfundingFactory contract address
+export const FACTORY_ADDRESS = "0x9BC996B2b0480290a6b3C534D8Eb6749fd90b250";
 
-// 2. The ABI of the CrowdfundingFactory contract (This does not need to change)
+// 2. The UPDATED ABI for the CrowdfundingFactory contract
 export const FACTORY_ABI = [
   {
     "type": "constructor",
     "inputs": [],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "event",
+    "name": "CampaignCreated",
+    "inputs": [
+      {
+        "name": "campaignAddress",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "owner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "indexed": false,
+        "internalType": "string"
+      },
+      {
+        "name": "goal",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "deadline",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
   },
   {
     "type": "function",
@@ -219,6 +256,16 @@ export const FACTORY_ABI = [
       }
     ],
     "stateMutability": "view"
+  },
+  {
+    "type": "error",
+    "name": "Factory__NotOwner",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "Factory__Paused",
+    "inputs": []
   }
 ];
 
