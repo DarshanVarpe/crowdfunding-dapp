@@ -8,21 +8,9 @@ import { ethers } from "ethers";
 import { TierCard } from "@/components/TierCard";
 import { CROWDFUNDING_ABI } from "@/constants";
 
-// Define TypeScript types for our data
 type Tier = { name: string; amount: bigint; backers: bigint; };
 type Comment = { author: string; timestamp: bigint; commentText: string; };
-type CampaignDetails = {
-    name: string;
-    description: string;
-    deadline: Date;
-    goal: bigint;
-    balance: bigint;
-    owner: string;
-    status: number;
-    paused: boolean;
-    tiers: Tier[];
-    comments: Comment[];
-};
+type CampaignDetails = { name: string; description: string; deadline: Date; goal: bigint; balance: bigint; owner: string; status: number; paused: boolean; tiers: Tier[]; comments: Comment[]; };
 
 export default function CampaignPage() {
     const { campaignAddress } = useParams();
@@ -35,7 +23,6 @@ export default function CampaignPage() {
     const [hasContributed, setHasContributed] = useState(false);
     const [daysToAdd, setDaysToAdd] = useState<string>("7");
 
-    // Central data fetching function
     const fetchCampaignDetails = useCallback(async () => {
         if (typeof window.ethereum !== 'undefined' && campaignAddress) {
             try {
@@ -43,9 +30,7 @@ export default function CampaignPage() {
                 const accounts = await provider.listAccounts();
                 const currentAccount = (accounts.length > 0 && accounts[0]) ? accounts[0].address : null;
                 setActiveAccount(currentAccount);
-
                 const contract = new ethers.Contract(campaignAddress as string, CROWDFUNDING_ABI, provider);
-
                 const [name, description, deadline, goal, balance, owner, status, tiers, contribution, comments, paused] = await Promise.all([
                     contract.name(), contract.description(), contract.deadline(),
                     contract.goal(), contract.getContractBalance(), contract.owner(),
@@ -54,11 +39,7 @@ export default function CampaignPage() {
                     contract.getComments(),
                     contract.paused()
                 ]);
-
-                setDetails({
-                    name, description, deadline: new Date(Number(deadline) * 1000),
-                    goal, balance, owner, status: Number(status), tiers, comments, paused
-                });
+                setDetails({ name, description, deadline: new Date(Number(deadline) * 1000), goal, balance, owner, status: Number(status), tiers, comments, paused });
                 setHasContributed(contribution > BigInt(0));
             } catch (error) {
                 console.error("Failed to fetch campaign details:", error);
@@ -72,7 +53,6 @@ export default function CampaignPage() {
         fetchCampaignDetails();
     }, [fetchCampaignDetails]);
 
-    // Central transaction handler
     const handleTransaction = async (action: () => Promise<any>, successMessage: string) => {
         setIsProcessing(true);
         try {
@@ -80,15 +60,14 @@ export default function CampaignPage() {
             await tx.wait();
             alert(successMessage);
             await fetchCampaignDetails();
-        } catch (error: any) {
+        } catch (error) {
             console.error("Transaction failed:", error);
-            alert(`Error: ${error.message}`);
+            alert(`Error: ${(error as Error).message}`);
         } finally {
             setIsProcessing(false);
         }
     };
-
-    // Corrected async/await functions for all contract write calls
+    
     const handleWithdraw = () => {
         const action = async () => {
             const browserProvider = new ethers.BrowserProvider(window.ethereum);
@@ -131,13 +110,11 @@ export default function CampaignPage() {
 
     if (isLoading) return <div className="text-center mt-20"><p>Loading Campaign Details...</p></div>;
     if (!details) return <div className="text-center mt-20"><p>Campaign Not Found.</p></div>;
-
-    // UI logic variables
+    
     const goalNum = Number(ethers.formatEther(details.goal));
     const balanceNum = Number(ethers.formatEther(details.balance));
     let balancePercentage = goalNum > 0 ? (balanceNum / goalNum) * 100 : 0;
     if (balancePercentage > 100) balancePercentage = 100;
-    
     const getStatusInfo = (status: number) => {
         switch (status) {
             case 0: return { text: "Active", color: "bg-green-500" };
@@ -146,7 +123,6 @@ export default function CampaignPage() {
             default: return { text: "Unknown", color: "bg-gray-500" };
         }
     };
-    
     const statusInfo = getStatusInfo(details.status);
     const isOwner = details.owner.toLowerCase() === activeAccount?.toLowerCase();
     const canWithdraw = isOwner && details.status === 1 && details.balance > 0;
@@ -155,9 +131,7 @@ export default function CampaignPage() {
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight break-all bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                    {details.name}
-                </h1>
+                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight break-all bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">{details.name}</h1>
                 <div className="flex items-center gap-x-4">
                     {canRefund && ( <button onClick={handleRefund} disabled={isProcessing} className="px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-600 disabled:bg-gray-400 transition-colors">{isProcessing ? "Refunding..." : "Claim Refund"}</button> )}
                     {canWithdraw && ( <button onClick={handleWithdraw} disabled={isProcessing} className="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 disabled:bg-gray-400 transition-colors">{isProcessing ? "Withdrawing..." : "Withdraw Funds"}</button> )}
@@ -167,24 +141,14 @@ export default function CampaignPage() {
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2">
-                    <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-                        <h2 className="text-2xl font-semibold text-gray-800 mb-3">About this Campaign</h2>
-                        <p className="text-gray-600 leading-relaxed">{details.description}</p>
-                    </div>
-                    
+                    <div className="bg-white p-6 rounded-lg shadow-md mb-6"><h2 className="text-2xl font-semibold text-gray-800 mb-3">About this Campaign</h2><p className="text-gray-600 leading-relaxed">{details.description}</p></div>
                     <div className="bg-white p-6 rounded-lg shadow-md">
                         <h3 className="text-xl font-semibold text-gray-800 mb-4">Funding Progress</h3>
                         <div className="mb-2">
-                             <div className="flex justify-between items-center mb-1">
-                                <span className="text-lg font-bold text-blue-600">{ethers.formatEther(details.balance)} POL</span>
-                                <span className="text-sm text-gray-500">raised of {ethers.formatEther(details.goal)} POL goal</span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-4">
-                                <div className="bg-blue-600 h-4 rounded-full" style={{ width: `${balancePercentage}%` }}></div>
-                            </div>
+                            <div className="flex justify-between items-center mb-1"><span className="text-lg font-bold text-blue-600">{ethers.formatEther(details.balance)} POL</span><span className="text-sm text-gray-500">raised of {ethers.formatEther(details.goal)} POL goal</span></div>
+                            <div className="w-full bg-gray-200 rounded-full h-4"><div className="bg-blue-600 h-4 rounded-full" style={{ width: `${balancePercentage}%` }}></div></div>
                         </div>
                     </div>
-                    
                     {isOwner && isEditing && (
                         <div className="bg-white p-6 rounded-lg shadow-md mt-6 border-l-4 border-amber-500">
                             <h3 className="text-xl font-semibold text-gray-800 mb-4">Admin Controls</h3>
@@ -192,41 +156,26 @@ export default function CampaignPage() {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Pause Campaign</label>
                                     <p className="text-xs text-gray-500 mb-2">Temporarily stop new contributions and comments.</p>
-                                    <button onClick={handleTogglePause} disabled={isProcessing} className={`px-4 py-2 text-sm font-semibold text-white rounded-md shadow-sm transition-colors disabled:bg-gray-400 ${details.paused ? 'bg-green-600 hover:bg-green-700' : 'bg-amber-600 hover:bg-amber-700'}`}>
-                                        {isProcessing ? 'Processing...' : (details.paused ? 'Unpause Campaign' : 'Pause Campaign')}
-                                    </button>
+                                    <button onClick={handleTogglePause} disabled={isProcessing} className={`px-4 py-2 text-sm font-semibold text-white rounded-md shadow-sm transition-colors disabled:bg-gray-400 ${details.paused ? 'bg-green-600 hover:bg-green-700' : 'bg-amber-600 hover:bg-amber-700'}`}>{isProcessing ? 'Processing...' : (details.paused ? 'Unpause Campaign' : 'Pause Campaign')}</button>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Extend Deadline</label>
                                     <p className="text-xs text-gray-500 mb-2">Add more days to the campaign deadline.</p>
                                     <div className="flex items-center gap-x-2">
                                         <input type="number" value={daysToAdd} onChange={(e) => setDaysToAdd(e.target.value)} className="w-24 px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
-                                        <button onClick={handleExtendDeadline} disabled={isProcessing || details.status !== 0} className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed" title={details.status !== 0 ? "Can only extend active campaigns" : ""}>
-                                            {isProcessing ? 'Extending...' : 'Extend'}
-                                        </button>
+                                        <button onClick={handleExtendDeadline} disabled={isProcessing || details.status !== 0} className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed" title={details.status !== 0 ? "Can only extend active campaigns" : ""}>{isProcessing ? 'Extending...' : 'Extend'}</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     )}
-                    
-                    <div className="bg-white p-6 rounded-lg shadow-md mt-6">
-                        <CommentsSection contractAddress={campaignAddress as string} comments={details.comments} onCommentPosted={fetchCampaignDetails} isPaused={details.paused} />
-                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow-md mt-6"><CommentsSection contractAddress={campaignAddress as string} comments={details.comments} onCommentPosted={fetchCampaignDetails} isPaused={details.paused} /></div>
                 </div>
-
                 <div className="lg:col-span-1">
                     <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-xl font-semibold text-gray-800">Status</h3>
-                            <span className={`px-3 py-1 text-sm font-semibold text-white rounded-full ${statusInfo.color}`}>{statusInfo.text}</span>
-                        </div>
-                        <div>
-                            <p className="text-gray-600 font-medium">Deadline</p>
-                            <p className="font-bold text-gray-800">{details.deadline.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                        </div>
+                        <div className="flex justify-between items-center mb-4"><h3 className="text-xl font-semibold text-gray-800">Status</h3><span className={`px-3 py-1 text-sm font-semibold text-white rounded-full ${statusInfo.color}`}>{statusInfo.text}</span></div>
+                        <div><p className="text-gray-600 font-medium">Deadline</p><p className="font-bold text-gray-800">{details.deadline.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p></div>
                     </div>
-                    
                     {details && (
                         <div>
                             <h3 className="text-2xl font-bold text-blue-600 mb-4 tracking-tight">Support this Campaign</h3>
@@ -240,7 +189,6 @@ export default function CampaignPage() {
                     )}
                 </div>
             </div>
-            
             {isModalOpen && ( <AddTierModal setIsModalOpen={setIsModalOpen} contractAddress={campaignAddress as string} onTierAdded={fetchCampaignDetails} /> )}
         </div>
     );
