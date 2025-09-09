@@ -1,4 +1,13 @@
-cache/
-out/
+
+
+# Dependencies
 /node_modules
-yarn.lock
+/client/node_modules
+
+# Cache and Build folders
+/cache
+/out
+/client/.next
+
+# Environment variables
+.env
