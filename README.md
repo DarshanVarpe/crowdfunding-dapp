@@ -1,10 +1,9 @@
 # Decentralized Crowdfunding dApp on Polygon
 
-[![Deploy with Vercel]([https://vercel.com/button](https://crowdfunding-dapp-0.vercel.app))](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDarshanVarpe%2Fcrowdfunding-dapp&root-directory=client)
 
 A complete, full-stack decentralized application that allows users to create and fund crowdfunding campaigns directly on the blockchain. Built with a Solidity backend using the Foundry framework and a modern Next.js frontend with TypeScript.
 
-**Live Demo:** [**[[https://your-project-url.vercel.app](https://crowdfunding-dapp-0.vercel.app)]([https://crowdfunding-dapp-0.vercel.app](https://crowdfunding-dapp-0.vercel.app))**]([https://your-project-url.vercel.app](https://crowdfunding-dapp-0.vercel.app)) 👈 
+**Live Demo:** [(https://crowdfunding-dapp-0.vercel.app)]([https://crowdfunding-dapp-0.vercel.app])**
 
 <img width="1470" height="956" alt="image" src="https://github.com/user-attachments/assets/c2ffa28e-eec9-4c01-a4ba-d02749242d4b" />
 
